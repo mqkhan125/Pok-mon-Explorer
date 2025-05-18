@@ -1,4 +1,4 @@
-import React, { use, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { PokemonCards } from './PokemonCards';
 function PokemonApp() {
     const [pokemon, setPokemon] = useState([])
