@@ -1,75 +1,79 @@
-import React, { useEffect, useState } from 'react'
-import { PokemonCards } from './PokemonCards';
+import React, { useEffect, useState } from "react";
+import { PokemonCards } from "./PokemonCards";
+
 function PokemonApp() {
-    const [pokemon, setPokemon] = useState([])
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState(null)
+  const [pokemon, setPokemon] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [search, setSearch] = useState("");
 
-    const Api = "https://pokeapi.co/api/v2/pokemon?limit=124";
-  
-    const fetchPokemon = async() => {
-     try {
-         const res = await fetch(Api);
-         const data = await res.json();
- 
-         const detailedPokemonData = data.results.map(async(curPokemon) => {
-         
-             const res = await fetch(curPokemon.url)
-             const data = await res.json()
-             return data;
-         })
- // console.log(detailedPokemonData)
-         const detailedResponses = await Promise.all(detailedPokemonData)
-         // console.log(detailedResponses)
-         setPokemon(detailedResponses)
-         setLoading(false)
+  const Api = "https://pokeapi.co/api/v2/pokemon?limit=124";
 
-     } catch (error){
-        console.log(error)
-        setLoading(false)
-        setError(error)
-     }
+  const fetchPokemon = async () => {
+    try {
+      const res = await fetch(Api);
+      const data = await res.json();
 
-} 
+      const detailedPokemonData = data.results.map(async (curPokemon) => {
+        const res = await fetch(curPokemon.url);
+        const data = await res.json();
+        return data;
+      });
 
-    useEffect(() => {
-        fetchPokemon();
-    }, [])
-
-
-    if(loading) {
-        return(
-            <div>
-                <h1>Loading....</h1>
-            </div>
-        )
+      const detailedResponses = await Promise.all(detailedPokemonData);
+      setPokemon(detailedResponses);
+      setLoading(false);
+    } catch (error) {
+      console.error(error);
+      setLoading(false);
+      setError(error);
     }
+  };
 
-    if(error){
-        return(
-            <div>
-                <h1>{error.message}</h1>
-            </div>
-        )
-    }
+  useEffect(() => {
+    fetchPokemon();
+  }, []);
+
+  const searchData = pokemon.filter((curVal) =>
+    curVal.name.toLowerCase().includes(search.toLowerCase())
+  );
+
+  if (loading) {
+    return <h1>Loading...</h1>;
+  }
+
+  if (error) {
+    return <h1>{error.message}</h1>;
+  }
 
   return (
-    <section className='container'>
-        <header>
-            <h1>Lets catch Pokemon</h1>
-        </header>
-        <div>
-            <ul className='cards'>
-                {
-                    pokemon.map((curPokemon) => {
-                    return <PokemonCards key={curPokemon.id} pokemonData = {curPokemon} />
-                    })
-                }
-            </ul>
-        </div>
+    <section className="container">
+      <header>
+        <h1>Let's Catch Pokémon</h1>
+      </header>
+
+      <div className="pokemon-search">
+        <input
+          type="text"
+          placeholder="Search"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+      </div>
+
+      {searchData.length === 0 && (
+        <p style={{ textAlign: "center", fontSize: "2rem", color: "#888" }}>
+          No Pokémon matched your search.
+        </p>
+      )}
+
+      <ul className="cards">
+        {searchData.map((curPokemon) => (
+          <PokemonCards key={curPokemon.id} pokemonData={curPokemon} />
+        ))}
+      </ul>
     </section>
-  )
+  );
 }
 
-export default PokemonApp 
-
+export default PokemonApp;
